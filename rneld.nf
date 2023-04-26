@@ -24,9 +24,8 @@ process PLINK_SUBSET {
     val(species_opts)
 
     output:
-    tuple val(meta), path("*.bed"), emit: bed
-    tuple val(meta), path("*.bim"), emit: bim
-    tuple val(meta), path("*.fam"), emit: fam
+    tuple val(meta), path("*.map"), emit: map
+    tuple val(meta), path("*.ped"), emit: ped
     path "versions.yml"           , emit: versions
 
     script:
@@ -39,8 +38,8 @@ process PLINK_SUBSET {
         $species_opts \\
         --bfile $prefix \\
         --thin-indiv-count ${meta.individuals} \\
-        --make-bed \\
         --threads $task.cpus \\
+        --recode \\
         --out ${outfile}
 
     cat <<-END_VERSIONS > versions.yml
@@ -55,10 +54,9 @@ process PLINK_SUBSET {
     def prefix = "${bed.getBaseName()}"
     def outfile = "${bed.getBaseName()}_${individuals}_individuals_step_${step}"
     """
-    touch ${outfile}.bed
-    touch ${outfile}.bim
-    touch ${outfile}.fam
-    touch version.yml
+    touch ${outfile}.map
+    touch ${outfile}.ped
+    touch versions.yml
     """
 }
 
