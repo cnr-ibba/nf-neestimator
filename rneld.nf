@@ -102,6 +102,7 @@ process PED2GENEPOP {
     """
 }
 
+
 workflow RNELD {
     iterations_ch = individuals_ch.combine(steps_ch)//.view()
         .map{ iteration -> [[
@@ -124,6 +125,7 @@ workflow RNELD {
     // create GENEPOP file
     PED2GENEPOP(pgdspider_input_ch)
 }
+
 
 workflow {
     RNELD()
