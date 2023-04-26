@@ -4,3 +4,10 @@
 # ignore results dir
 work/
 results/
+
+# ignore plink binary files
+*.bed
+*.bim
+*.fam
+*.log
+*.nosex
