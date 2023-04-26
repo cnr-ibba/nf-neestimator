@@ -60,6 +60,48 @@ process PLINK_SUBSET {
     """
 }
 
+process PED2GENEPOP {
+    tag "$meta.id"
+    label 'process_low'
+
+    conda "bioconda::pgdspider=2.1.1.5"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/pgdspider:2.1.1.5--hdfd78af_1' :
+        'quay.io/biocontainers/pgdspider:2.1.1.5--hdfd78af_1' }"
+
+    input:
+    tuple val(meta), val(ped), path(spid)
+
+    output:
+    tuple val(meta), path("*.txt"), emit: map
+    path "versions.yml"           , emit: versions
+
+    script:
+    def prefix = "${ped.getBaseName()}"
+    """
+    PGDSpider2-cli \\
+        -Xmx2G \\
+        -Xms1G \\
+        -inputfile $ped \\
+        -inputformat PED \\
+        -outputfile ${prefix}_genepop.txt \\
+        -outputformat GENEPOP \\
+        -spid $spid
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        plink: \$(echo \$(PGDSpider2-cli -h) | grep -i Copyright | sed 's/ PGDSpider //;s/Copyright.*//')
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix = "${ped.getBaseName()}"
+    """
+    touch ${prefix}_genepop.txt
+    touch versions.yml
+    """
+}
+
 workflow RNELD {
     iterations_ch = individuals_ch.combine(steps_ch)//.view()
         .map{ iteration -> [[
@@ -70,7 +112,17 @@ workflow RNELD {
     plink_input_ch = Channel.fromPath( "${params.prefix}.{bim,bed,fam}")
         .collect()//.view()
 
+    // subsetting plink files
     PLINK_SUBSET(iterations_ch, plink_input_ch, params.species_opts)
+
+    // get SPID path
+    pgdspider_spid_ch = Channel.fromPath(params.pgdspider_spid)
+
+    // a new channel for data conversion
+    pgdspider_input_ch = PLINK_SUBSET.out.ped.combine(pgdspider_spid_ch)//.view()
+
+    // create GENEPOP file
+    PED2GENEPOP(pgdspider_input_ch)
 }
 
 workflow {

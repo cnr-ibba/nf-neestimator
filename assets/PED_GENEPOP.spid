@@ -1,0 +1,29 @@
+# spid-file generated: Wed Apr 26 22:34:14 CEST 2023
+
+# PED Parser questions
+PARSER_FORMAT=PED
+
+# Is the Sex column absent in the input file?
+PED_PARSER_SEX_QUESTION=
+# Do you want to include a MAP file with loci information?
+PED_PARSER_INCLUDE_MAP_QUESTION=yes
+# Is the Phenotype absent in the input file?
+PED_PARSER_PHENOTYPE_QUESTION=
+# Open MAP file
+PED_PARSER_MAP_FILE_QUESTION=
+# Is the Individual ID column absent in the input file?
+PED_PARSER_IND_ID_QUESTION=
+# Are the Paternal ID and the Maternal ID columns absent in the input file?
+PED_PARSER_PATERNAL_MATERNAL_ID_QUESTION=
+# Is the Family ID column absent in the input file?
+PED_PARSER_FAMILY_ID_QUESTION=
+# Group individuals into populations according to:
+PED_PARSER_POPULATION_QUESTION=
+
+# GENEPOP Writer questions
+WRITER_FORMAT=GENEPOP
+
+# Specify which data type should be included in the GENEPOP file  (GENEPOP can only analyze one data type per file):
+GENEPOP_WRITER_DATA_TYPE_QUESTION=
+# Specify the locus/locus combination you want to write to the GENEPOP file:
+GENEPOP_WRITER_LOCUS_COMBINATION_QUESTION=
