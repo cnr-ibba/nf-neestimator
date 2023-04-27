@@ -78,10 +78,12 @@ process PED2GENEPOP {
 
     script:
     def prefix = "${ped.getBaseName()}"
+    def xmx = (task.memory.mega*0.95).intValue()
+    def xms = task.memory.mega / 2
     """
     PGDSpider2-cli \\
-        -Xmx2G \\
-        -Xms1G \\
+        -Xmx${xmx}M \\
+        -Xms${xms}M \\
         -inputfile $ped \\
         -inputformat PED \\
         -outputfile ${prefix}_genepop.txt \\
