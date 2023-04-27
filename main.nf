@@ -19,7 +19,7 @@ process PLINK_SUBSET {
         'quay.io/biocontainers/plink:1.90b6.21--h779adbc_1' }"
 
     input:
-    tuple val(meta), val(iteration)
+    tuple val(meta), val(seed)
     tuple path(bed), path(bim), path(fam)
     val(species_opts)
 
@@ -36,6 +36,7 @@ process PLINK_SUBSET {
     """
     plink \\
         $species_opts \\
+        --seed $seed \\
         --bfile $prefix \\
         --thin-indiv-count ${meta.individuals} \\
         --threads $task.cpus \\
@@ -156,7 +157,7 @@ workflow RLDNE_PIPELINE {
         .map{ iteration -> [[
             id:"${iteration[0]}_individual_${iteration[1]}_step",
             individuals: "${iteration[0]}",
-            step: "${iteration[1]}"], iteration ]}//.view()
+            step: "${iteration[1]}"], iteration[0] * iteration[1] ]}//.view()
 
     plink_input_ch = Channel.fromPath( "${params.prefix}.{bim,bed,fam}")
         .collect()//.view()
@@ -175,7 +176,6 @@ workflow RLDNE_PIPELINE {
 
     // launch RLDNE
     RLDNE(PED2GENEPOP.out.genepop)
-
 }
 
 
