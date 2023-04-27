@@ -73,7 +73,7 @@ process PED2GENEPOP {
     tuple val(meta), val(ped), path(spid)
 
     output:
-    tuple val(meta), path("*.txt"), emit: map
+    tuple val(meta), path("*.txt"), emit: genepop
     path "versions.yml"           , emit: versions
 
     script:
@@ -105,7 +105,53 @@ process PED2GENEPOP {
 }
 
 
-workflow RLDNE {
+process RLDNE {
+    tag "$meta.id"
+    label 'process_single'
+
+    container "bunop/rldne:0.2"
+
+    input:
+    tuple val(meta), path(genepop)
+
+    output:
+    tuple val(meta), path("*_Ne_params.txt"), emit: params
+    tuple val(meta), path("*_Ne_out.txt"), emit: file
+    tuple val(meta), path("*_Ne_outxLD.txt"), emit: tab
+
+    script:
+    def prefix = "${genepop.getBaseName()}"
+    def ne_out_tab = "${prefix}_Ne_outxLD.txt"
+    def param_file = "${prefix}_Ne_params.txt"
+    def ne_out_file = "${prefix}_Ne_out.txt"
+    """
+    #!/usr/bin/env Rscript
+
+    library(RLDNe)
+
+    param_files <- NeV2_LDNe_create(
+        input_file="${genepop}",
+        param_file="${param_file}",
+        NE_out_file="${ne_out_file}",
+        matingsystem = 1,
+        crit_vals = 0.02
+    )
+
+    run_LDNe(LDNe_params = param_files\$param_file)
+    """
+
+    stub:
+    def prefix = "${genepop.getBaseName()}"
+    """
+    touch ${prefix}_Ne_out.txt
+    touch ${prefix}_Ne_params.txt
+    touch ${prefix}_Ne_outxLD.txt
+    """
+
+}
+
+
+workflow RLDNE_PIPELINE {
     iterations_ch = individuals_ch.combine(steps_ch)//.view()
         .map{ iteration -> [[
             id:"individuals_${iteration[0]}_step_${iteration[1]}",
@@ -126,9 +172,13 @@ workflow RLDNE {
 
     // create GENEPOP file
     PED2GENEPOP(pgdspider_input_ch)
+
+    // launch RLDNE
+    RLDNE(PED2GENEPOP.out.genepop)
+
 }
 
 
 workflow {
-    RLDNE()
+    RLDNE_PIPELINE()
 }

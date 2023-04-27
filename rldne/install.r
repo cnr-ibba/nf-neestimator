@@ -1,6 +1,6 @@
 #! /usr/bin/env -S Rscript --slave --vanilla
 
-install.packages("devtools", repos='https://cran.rstudio.com/')
+install.packages("devtools", repos='https://cran.rstudio.com/', Ncpus=4)
 
 library("devtools")
 

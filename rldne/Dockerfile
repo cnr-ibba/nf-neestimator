@@ -1,9 +1,10 @@
 #
-# VERSION 0.1
+# VERSION 0.2
 # DOCKER-VERSION  23.0.4
 # AUTHOR:         Paolo Cozzi <paolo.cozzi@ibba.cnr.it>
 # DESCRIPTION:    A docker r-base container with RLDNe installed
 # TO_BUILD:       docker build --rm -t bunop/rldne .
+# TO_TAG:         docker tag bunop/rldne:latest bunop/rldne:0.2
 #
 
 # Get the last rocker/shiny image
@@ -14,6 +15,7 @@ LABEL maintainer="Paolo Cozzi <paolo.cozzi@ibba.cnr.it"
 
 # install package dependencies
 RUN apt-get update && apt-get install -y \
+        procps \
         libssl-dev \
         libxml2-dev \
         libfontconfig1-dev \
