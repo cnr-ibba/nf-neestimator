@@ -105,7 +105,7 @@ process PED2GENEPOP {
 }
 
 
-workflow RNELD {
+workflow RLDNE {
     iterations_ch = individuals_ch.combine(steps_ch)//.view()
         .map{ iteration -> [[
             id:"individuals_${iteration[0]}_step_${iteration[1]}",
@@ -130,5 +130,5 @@ workflow RNELD {
 
 
 workflow {
-    RNELD()
+    RLDNE()
 }
