@@ -32,7 +32,7 @@ process PLINK_SUBSET {
     def step = "${meta.step}"
     def individuals = "${meta.individuals}"
     def prefix = "${bed.getBaseName()}"
-    def outfile = "${bed.getBaseName()}_${individuals}_individuals_step_${step}"
+    def outfile = "${bed.getBaseName()}_${individuals}_individuals_${step}_step"
     """
     plink \\
         $species_opts \\
@@ -52,7 +52,7 @@ process PLINK_SUBSET {
     def step = "${meta.step}"
     def individuals = "${meta.individuals}"
     def prefix = "${bed.getBaseName()}"
-    def outfile = "${bed.getBaseName()}_${individuals}_individuals_step_${step}"
+    def outfile = "${bed.getBaseName()}_${individuals}_individuals_${step}_step"
     """
     touch ${outfile}.map
     touch ${outfile}.ped
@@ -154,7 +154,7 @@ process RLDNE {
 workflow RLDNE_PIPELINE {
     iterations_ch = individuals_ch.combine(steps_ch)//.view()
         .map{ iteration -> [[
-            id:"individuals_${iteration[0]}_step_${iteration[1]}",
+            id:"${iteration[0]}_individual_${iteration[1]}_step",
             individuals: "${iteration[0]}",
             step: "${iteration[1]}"], iteration ]}//.view()
 
