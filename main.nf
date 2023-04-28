@@ -2,11 +2,10 @@
 
 nextflow.enable.dsl = 2
 
-params.prefix = 'testdata/murciano_test'
-params.species_opts = '--allow-extra-chr --chr-set 29'
-
-steps_ch = Channel.from( 1..5 )
-individuals_ch = Channel.of( 20, 50, 100 )
+// check parameters
+if (!params.prefix) { exit 1, "Error: 'prefix' parameter not specified" }
+if (params.steps) { steps_ch = Channel.of( params.steps ) } else { exit 1, "Error: 'steps' parameter not specified" }
+if (params.individuals) { individuals_ch = Channel.fromList( params.individuals ) } else { exit 1, "Error: 'individuals' parameter not specified" }
 
 
 process PLINK_SUBSET {
@@ -61,6 +60,7 @@ process PLINK_SUBSET {
     """
 }
 
+
 process PED2GENEPOP {
     tag "$meta.id"
     label 'process_low'
@@ -109,6 +109,7 @@ process PED2GENEPOP {
 process RLDNE {
     tag "$meta.id"
     label 'process_single'
+    label 'error_retry'
 
     container "bunop/rldne:0.2"
 
