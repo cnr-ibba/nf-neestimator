@@ -4,7 +4,12 @@ nextflow.enable.dsl = 2
 
 // check parameters
 if (!params.prefix) { exit 1, "Error: 'prefix' parameter not specified" }
-if (params.steps) { steps_ch = Channel.of( params.steps ) } else { exit 1, "Error: 'steps' parameter not specified" }
+if (params.steps) {
+    def range = (1..params.steps)
+    steps_ch = Channel.of( range )
+} else {
+    exit 1, "Error: 'steps' parameter not specified"
+}
 if (params.individuals) { individuals_ch = Channel.fromList( params.individuals ) } else { exit 1, "Error: 'individuals' parameter not specified" }
 
 
