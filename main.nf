@@ -126,6 +126,8 @@ process RLDNE {
     tuple val(meta), path("*_Ne_out.txt"), emit: file
     tuple val(meta), path("*_Ne_outxLD.txt"), emit: tab
 
+    beforeScript 'export TMPDIR=${PWD}'
+
     script:
     def prefix = "${genepop.getBaseName()}"
     def ne_out_tab = "${prefix}_Ne_outxLD.txt"
