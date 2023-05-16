@@ -123,41 +123,54 @@ process LDNE {
     tuple val(meta), path(genepop)
 
     output:
-    tuple val(meta), path("*_Ne_params.txt"), emit: params
-    tuple val(meta), path("*_Ne_out.txt"), emit: file
-    tuple val(meta), path("*_Ne_outxLD.txt"), emit: tab
+    tuple val(meta), path("*_info.txt"), emit: info
+    tuple val(meta), path("*_option.txt"), emit: option
+    tuple val(meta), path("*_Ne.txt"), emit: output
+    tuple val(meta), path("*_NexLD.txt"), emit: tabular
 
     beforeScript 'export TMPDIR=${PWD}'
 
     script:
     def prefix = "${genepop.getBaseName()}"
-    def param_file = "${prefix}_Ne_params.txt"
-    def ne_out_file = "${prefix}_Ne_out.txt"
+    def info_file = "${prefix}_info.txt"
+    def option_file = "${prefix}_option.txt"
+    def output_file = "${prefix}_Ne.txt"
     """
-    cat <<EOF > ${param_file}
-    1       * LD Method
-    1       * number of critical values
-    0.02    * critical allele frequency values
-    1       * tabular output
-    1       * confidence intervals
-    1       * 0: Random mating, 1: Monogamy (LD method)
-    0       * max individual to be processed per pop, 0 for no limit
-    0       * Pop. range to run, given in pair. No limit if the first = 0
-    0       * Loc. ranges to run, given in pairs. No limit if the 1st = 0
-    ${ne_out_file}      * output file name
-    ${genepop}          * input file
-    *
+    cat <<EOF > ${info_file}
+    1           * A number = sum of method(s) to run: LD(=1), Het(=2), Coan(=4), Temporal(=8).
+    \$PWD/      * Input Directory
+    ${genepop}  * Input file name
+    2           * 1 = FSTAT format, 2 = GENEPOP format
+    \$PWD/      * Output Directory
+    ${output_file}*     * Output file name (put asterisk adjacent to the name to append)
+    1           * Number of critical values, added 1 if a run by rejecting only singleton alleles is included
+    0.02 -1     * Critical values, a special value '1' is for rejecting only singleton alleles
+    1           * 0: Random mating, 1: Monogamy (LD method)
     EOF
 
-    Ne2-1L c:${param_file}
+    cat <<EOF > ${option_file}
+    1  0  1  1  * First number = sum of method(s) to have extra output: LD(=1), Het(=2), Coan(=4), Temporal(=8)
+    0           * Maximum individuals/pop. If 0: no limit
+    0           * First entry n1 = 0: No Freq output. If n1 = -1: Freq. output up to population 50. Two entries n1, n2 with n1 <= n2: Freq output for populations from n1 to n2. Max. populations to have Freq output is set at 50
+    0           * For Burrow output file (up to 50 populations can have output). See remark below
+    1           * Parameter CI: 1 for Yes, 0 for No
+    1           * Jackknife CI: 1 for Yes, 0 for No
+    0           * Up to population, or range of populations to run (if 2 entries). If first entry = 0: no restriction
+    0           * All loci are accepted
+    1           * Enter 1: A file is created to document missing data if there are any in input file. Enter 0: no file created
+    0           * Line for chromosomes/loci option and file
+    EOF
+
+    Ne2-1L i:${info_file} o:${option_file}
     """
 
     stub:
     def prefix = "${genepop.getBaseName()}"
     """
-    touch ${prefix}_Ne_out.txt
-    touch ${prefix}_Ne_params.txt
-    touch ${prefix}_Ne_outxLD.txt
+    touch ${prefix}_info.txt
+    touch ${prefix}_option.txt
+    touch ${prefix}_Ne.txt
+    touch ${prefix}_NexLD.txt
     """
 
 }
