@@ -111,12 +111,13 @@ process PED2GENEPOP {
 }
 
 
-process RLDNE {
+process LDNE {
     tag "$meta.id"
     label 'process_single'
+    label 'process_high_memory'
     label 'error_retry'
 
-    container "bunop/rldne:0.2"
+    container "bunop/neestimator2x:0.1"
 
     input:
     tuple val(meta), path(genepop)
@@ -130,23 +131,25 @@ process RLDNE {
 
     script:
     def prefix = "${genepop.getBaseName()}"
-    def ne_out_tab = "${prefix}_Ne_outxLD.txt"
     def param_file = "${prefix}_Ne_params.txt"
     def ne_out_file = "${prefix}_Ne_out.txt"
     """
-    #!/usr/bin/env Rscript
+    cat <<EOF > ${param_file}
+    1       * LD Method
+    1       * number of critical values
+    0.02    * critical allele frequency values
+    1       * tabular output
+    1       * confidence intervals
+    1       * 0: Random mating, 1: Monogamy (LD method)
+    0       * max individual to be processed per pop, 0 for no limit
+    0       * Pop. range to run, given in pair. No limit if the first = 0
+    0       * Loc. ranges to run, given in pairs. No limit if the 1st = 0
+    ${ne_out_file}      * output file name
+    ${genepop}          * input file
+    *
+    EOF
 
-    library(RLDNe)
-
-    param_files <- NeV2_LDNe_create(
-        input_file="${genepop}",
-        param_file="${param_file}",
-        NE_out_file="${ne_out_file}",
-        matingsystem = 1,
-        crit_vals = 0.02
-    )
-
-    run_LDNe(LDNe_params = param_files\$param_file)
+    Ne2-1L c:${param_file}
     """
 
     stub:
@@ -160,7 +163,7 @@ process RLDNE {
 }
 
 
-workflow RLDNE_PIPELINE {
+workflow LDNE_PIPELINE {
     iterations_ch = individuals_ch.combine(steps_ch)//.view()
         .map{ iteration -> [[
             id:"${iteration[0]}_individual_${iteration[1]}_step",
@@ -182,11 +185,11 @@ workflow RLDNE_PIPELINE {
     // create GENEPOP file
     PED2GENEPOP(pgdspider_input_ch)
 
-    // launch RLDNE
-    RLDNE(PED2GENEPOP.out.genepop)
+    // launch LDNE
+    LDNE(PED2GENEPOP.out.genepop)
 }
 
 
 workflow {
-    RLDNE_PIPELINE()
+    LDNE_PIPELINE()
 }

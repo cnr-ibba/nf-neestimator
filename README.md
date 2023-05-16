@@ -1,10 +1,10 @@
-# nf-rldne
+# nf-neestimator
 
-A nextflow pipeline for RLDNe calculations with bootstrapping
+A nextflow pipeline for Ne estimates with bootstrapping
 
 ## Background
 
-This pipeline is an attempt to call [RLDNe](https://github.com/zakrobinson/RLDNe)
+This pipeline is an attempt to call [NeEstimator2](http://www.molecularfisherieslaboratory.com.au/neestimator-software/)
 by bootstrapping individuals from a plink binary file. You require both
 [nextflow](https://www.nextflow.io/) and [singularity](https://apptainer.org/)
 (or [docker](https://www.docker.com/)) configured in order to call this pipeline
@@ -15,7 +15,7 @@ properly
 Simply type:
 
 ```bash
-nextflow run cnr-ibba/nf-rldne -resume -profile singularity --prefix <plink file prefix>
+nextflow run cnr-ibba/nf-neestimator -resume -profile singularity --prefix <plink file prefix>
 ```
 
 where the ``--prefix`` parameter is the same prefix you would pass as plink ``--bfile``

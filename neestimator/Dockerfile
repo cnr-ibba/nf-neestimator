@@ -15,6 +15,7 @@ LABEL maintainer="Paolo Cozzi <paolo.cozzi@ibba.cnr.it"
 
 # install package dependencies
 RUN apt-get update && apt-get install -y \
+        procps \
         build-essential \
         git \
     && apt-get clean && rm -rf /var/lib/apt/lists/
