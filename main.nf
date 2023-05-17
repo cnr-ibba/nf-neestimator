@@ -159,12 +159,14 @@ process LDNE {
     tuple val(meta), path("*_option.txt"), emit: option
     tuple val(meta), path("*_Ne.txt"), emit: output
     tuple val(meta), path("*_NexLD.txt"), emit: tabular
+    tuple val(meta), path("*NoDat.txt"), emit: missing
 
     script:
     def prefix = "${genepop.getBaseName()}"
     def info_file = "${prefix}_info.txt"
     def option_file = "${prefix}_option.txt"
     def output_file = "${prefix}_Ne.txt"
+    def missing_file = "${prefix}NoDat.txt"
     """
     cat <<EOF > ${info_file}
     1           * A number = sum of method(s) to run: LD(=1), Het(=2), Coan(=4), Temporal(=8).
@@ -201,6 +203,7 @@ process LDNE {
     touch ${prefix}_option.txt
     touch ${prefix}_Ne.txt
     touch ${prefix}_NexLD.txt
+    touch ${prefix}NoDat.txt
     """
 }
 
