@@ -184,13 +184,16 @@ process SUMMARIZE {
 
     input:
     tuple val(meta), path(ne_output)
+    tuple path(bed), path(bim), path(fam)
 
     output:
     tuple val(meta), path("*_individuals.csv"), emit: csv
 
     script:
+    def prefix = "${bed.getBaseName()}"
+    def summary = "${prefix}_Ne_${meta}_individuals.csv"
     """
-    parse_ne_results.py > Ne_${meta}_individuals.csv
+    parse_ne_results.py > ${summary}
     """
 
     stub:
@@ -235,7 +238,7 @@ workflow LDNE_PIPELINE {
         //.view()
 
     // collect and parse results
-    SUMMARIZE(neestimator_ch)
+    SUMMARIZE(neestimator_ch, plink_input_ch)
 }
 
 
