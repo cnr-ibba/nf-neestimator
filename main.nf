@@ -76,10 +76,12 @@ process PED2GENEPOP {
         'quay.io/biocontainers/pgdspider:2.1.1.5--hdfd78af_1' }"
 
     input:
-    tuple val(meta), val(ped), path(spid)
+    tuple val(meta), path(ped)
+    tuple val(meta), path(map)
 
     output:
     tuple val(meta), path("*.txt"), emit: genepop
+    tuple val(meta), path("*.spid"), emit: spid
     path "versions.yml"           , emit: versions
 
     script:
@@ -87,14 +89,44 @@ process PED2GENEPOP {
     def xmx = (task.memory.mega*0.95).intValue()
     def xms = task.memory.mega / 2
     """
+    cat <<EOF > PED_GENEPOP.spid
+    # PED Parser questions
+    PARSER_FORMAT=PED
+
+    # Is the Phenotype absent in the input file?
+    PED_PARSER_PHENOTYPE_QUESTION=false
+    # Is the Family ID column absent in the input file?
+    PED_PARSER_FAMILY_ID_QUESTION=false
+    # Do you want to include a MAP file with loci information?
+    PED_PARSER_INCLUDE_MAP_QUESTION=true
+    # Is the Sex column absent in the input file?
+    PED_PARSER_SEX_QUESTION=false
+    # Are the Paternal ID and the Maternal ID columns absent in the input file?
+    PED_PARSER_PATERNAL_MATERNAL_ID_QUESTION=false
+    # Open MAP file
+    PED_PARSER_MAP_FILE_QUESTION=${map}
+    # Group individuals into populations according to:
+    PED_PARSER_POPULATION_QUESTION=FAMILY
+    # Is the Individual ID column absent in the input file?
+    PED_PARSER_IND_ID_QUESTION=false
+
+    # GENEPOP Writer questions
+    WRITER_FORMAT=GENEPOP
+
+    # Specify the locus/locus combination you want to write to the GENEPOP file:
+    GENEPOP_WRITER_LOCUS_COMBINATION_QUESTION=
+    # Specify which data type should be included in the GENEPOP file  (GENEPOP can only analyze one data type per file):
+    GENEPOP_WRITER_DATA_TYPE_QUESTION=SNP
+    EOF
+
     PGDSpider2-cli \\
         -Xmx${xmx}M \\
         -Xms${xms}M \\
-        -inputfile $ped \\
+        -inputfile ${ped} \\
         -inputformat PED \\
         -outputfile ${prefix}_genepop.txt \\
         -outputformat GENEPOP \\
-        -spid $spid
+        -spid PED_GENEPOP.spid
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -106,6 +138,7 @@ process PED2GENEPOP {
     def prefix = "${ped.getBaseName()}"
     """
     touch ${prefix}_genepop.txt
+    touch PED_GENEPOP.spid
     touch versions.yml
     """
 }
@@ -217,14 +250,8 @@ workflow LDNE_PIPELINE {
     // subsetting plink files
     PLINK_SUBSET(iterations_ch, plink_input_ch, params.species_opts)
 
-    // get SPID path
-    pgdspider_spid_ch = Channel.fromPath(params.pgdspider_spid)
-
-    // a new channel for data conversion
-    pgdspider_input_ch = PLINK_SUBSET.out.ped.combine(pgdspider_spid_ch)//.view()
-
     // create GENEPOP file
-    PED2GENEPOP(pgdspider_input_ch)
+    PED2GENEPOP(PLINK_SUBSET.out.ped, PLINK_SUBSET.out.map)
 
     // launch LDNE
     LDNE(PED2GENEPOP.out.genepop)
