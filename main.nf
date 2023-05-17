@@ -147,10 +147,9 @@ process PED2GENEPOP {
 process LDNE {
     tag "$meta.id"
     label 'process_single'
-    label 'process_high_memory'
     label 'error_retry'
 
-    container "bunop/neestimator2x:0.1"
+    container "bunop/neestimator2x:0.2"
 
     input:
     tuple val(meta), path(genepop)
