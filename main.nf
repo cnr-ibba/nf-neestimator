@@ -128,8 +128,6 @@ process LDNE {
     tuple val(meta), path("*_Ne.txt"), emit: output
     tuple val(meta), path("*_NexLD.txt"), emit: tabular
 
-    beforeScript 'export TMPDIR=${PWD}'
-
     script:
     def prefix = "${genepop.getBaseName()}"
     def info_file = "${prefix}_info.txt"
@@ -172,7 +170,34 @@ process LDNE {
     touch ${prefix}_Ne.txt
     touch ${prefix}_NexLD.txt
     """
+}
 
+
+process SUMMARIZE {
+    tag "$meta individuals"
+    label 'process_low'
+
+    conda "biopython:1.78"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/biopython:1.78' :
+        'quay.io/biocontainers/biopython:1.78' }"
+
+    input:
+    tuple val(meta), path(ne_output)
+
+    output:
+    tuple val(meta), path("*_individuals.csv"), emit: csv
+
+    script:
+    """
+    parse_ne_results.py > Ne_${meta}_individuals.csv
+    """
+
+    stub:
+    def summary = "Ne_${meta}_individuals.csv"
+    """
+    touch ${summary}
+    """
 }
 
 
@@ -200,6 +225,17 @@ workflow LDNE_PIPELINE {
 
     // launch LDNE
     LDNE(PED2GENEPOP.out.genepop)
+
+    neestimator_ch = LDNE.out.tabular
+        .map { meta, path -> [
+            meta["individuals"],
+            path
+        ]}
+        .groupTuple( by: 0, size: params.steps )
+        //.view()
+
+    // collect and parse results
+    SUMMARIZE(neestimator_ch)
 }
 
 
