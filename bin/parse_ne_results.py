@@ -14,14 +14,16 @@ import sys
 import logging
 
 from typing import Tuple
-from pathlib import Path
+from pathlib import Path, PosixPath
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
 loci_pattern = re.compile("Number of Loci = ([0-9]+)")
+step_pattern = re.compile("individuals_([0-9]+)_step")
 
 header = [
+    'step',
     'n_loci',
     'population',
     'samp_size',
@@ -65,7 +67,20 @@ def search_loci(handle):
         return int(match.groups()[0])
 
 
-def process_datafile(data_file):
+def search_step(data_file: PosixPath):
+    global step_pattern
+
+    name = data_file.name
+    match = re.search(step_pattern, name)
+
+    if match:
+        return int(match.groups()[0])
+
+
+def process_datafile(data_file: PosixPath):
+    # get step
+    step = search_step(data_file)
+
     with open(data_file) as handle:
         # read number of loci
         position, skipped = skip_lines(handle, 4)
@@ -90,7 +105,7 @@ def process_datafile(data_file):
             for i in [2, 4, 5, 6, 7, 8, 9, 10]:
                 line[i] = float(line[i])
 
-            record = NexLD._make([n_loci] + line)
+            record = NexLD._make([step, n_loci] + line)
             yield record
 
 
