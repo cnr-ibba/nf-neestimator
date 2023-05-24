@@ -103,7 +103,11 @@ def process_datafile(data_file: PosixPath):
                 line[i] = int(line[i])
 
             for i in [2, 4, 5, 6, 7, 8, 9, 10]:
-                line[i] = float(line[i])
+                if line[i] == "Infinite":
+                    logger.warning(f"Got Infinite value in {data_file}")
+                    line[i] = float('inf')
+                else:
+                    line[i] = float(line[i])
 
             record = NexLD._make([step, n_loci] + line)
             yield record
