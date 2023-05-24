@@ -43,7 +43,7 @@ NexLD = namedtuple("NexLD", header)
 
 
 def skip_lines(handle, skip) -> Tuple[int, list]:
-    logger.info(f"Skipping {skip} lines")
+    logger.debug(f"Skipping {skip} lines")
 
     # track skipped lines
     skipped = list()
@@ -52,7 +52,7 @@ def skip_lines(handle, skip) -> Tuple[int, list]:
         line = handle.readline().strip()
         position = handle.tell()
 
-        logger.warning(f"Skipping: {line}")
+        logger.debug(f"Skipping: {line}")
         skipped.append(line)
 
     return position, skipped
