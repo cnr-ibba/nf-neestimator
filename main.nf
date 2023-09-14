@@ -159,7 +159,7 @@ process LDNE {
     tuple val(meta), path("*_option.txt"), emit: option
     tuple val(meta), path("*_Ne.txt"), emit: output
     tuple val(meta), path("*_NexLD.txt"), emit: tabular
-    tuple val(meta), path("*NoDat.txt"), emit: missing
+    tuple val(meta), path("*NoDat.txt"), emit: missing, optional: true
 
     script:
     def prefix = "${genepop.getBaseName()}"
@@ -203,7 +203,6 @@ process LDNE {
     touch ${prefix}_option.txt
     touch ${prefix}_Ne.txt
     touch ${prefix}_NexLD.txt
-    touch ${prefix}NoDat.txt
     """
 }
 
