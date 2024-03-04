@@ -33,12 +33,14 @@ process PLINK_SUBSET {
     path "versions.yml"           , emit: versions
 
     script:
+    def args = task.ext.args ?: ''
     def step = "${meta.step}"
     def individuals = "${meta.individuals}"
     def prefix = "${bed.getBaseName()}"
     def outfile = "${bed.getBaseName()}_${individuals}_individuals_${step}_step"
     """
     plink \\
+        $args \\
         $species_opts \\
         --seed $seed \\
         --bfile $prefix \\
@@ -85,6 +87,7 @@ process PED2GENEPOP {
     path "versions.yml"           , emit: versions
 
     script:
+    def args = task.ext.args ?: ''
     def prefix = "${ped.getBaseName()}"
     def xmx = (task.memory.mega*0.95).intValue()
     def xms = task.memory.mega / 2
@@ -120,6 +123,7 @@ process PED2GENEPOP {
     EOF
 
     PGDSpider2-cli \\
+        $args \\
         -Xmx${xmx}M \\
         -Xms${xms}M \\
         -inputfile ${ped} \\
