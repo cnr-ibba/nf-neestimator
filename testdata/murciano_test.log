@@ -1,0 +1,28 @@
+PLINK v1.90b6.18 64-bit (16 Jun 2020)
+Options in effect:
+  --allow-extra-chr
+  --bfile /home/manunzaa/vargoats/FAO_Ne/RNELD_murciano_FAO/murciano_1000/murciano_gmmphk
+  --chr 29
+  --chr-set 29
+  --make-bed
+  --out murciano_test
+
+Hostname: core
+Working directory: /home/cozzip/test-RNELD/test
+Start time: Wed Apr 26 21:14:03 2023
+
+Random number seed: 1682536443
+16024 MB RAM detected; reserving 8012 MB for main workspace.
+912 out of 45487 variants loaded from .bim file.
+895 samples (0 males, 860 females, 35 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to murciano_test.nosex .
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 895 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.998635.
+912 variants and 895 samples pass filters and QC.
+Note: No phenotypes present.
+--make-bed to murciano_test.bed + murciano_test.bim + murciano_test.fam ...
+done.
+
+End time: Wed Apr 26 21:14:03 2023
